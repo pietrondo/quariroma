@@ -1,5 +1,7 @@
 # Quarioma - Gestione Acquari
 
+![Logo Acquari](logo-acquari.png)
+
 ## Descrizione
 Quarioma è un'applicazione monolitica fullstack sviluppata con Node.js e React per la gestione di acquari, pesci e parametri ambientali. L'applicazione include funzionalità di autenticazione, dashboard interattive, filtri avanzati e grafici per il monitoraggio dei parametri.
 
