@@ -1,0 +1,29 @@
+# Quarioma - Gestione Acquari
+
+## Descrizione
+Quarioma è un'applicazione monolitica fullstack sviluppata con Node.js e React per la gestione di acquari, pesci e parametri ambientali. L'applicazione include funzionalità di autenticazione, dashboard interattive, filtri avanzati e grafici per il monitoraggio dei parametri.
+
+## Funzionalità principali
+- **Dashboard interattiva**: Visualizza e gestisci gli acquari con dettagli specifici.
+- **Monitoraggio parametri**: Inserimento e visualizzazione di parametri come temperatura, pH, GH, KH, NO2, NO3, ammoniaca e ossigeno.
+- **Grafici storici**: Analisi dei parametri con grafici aggiornati in tempo reale.
+- **Autenticazione**: Accesso sicuro con credenziali demo (admin/admin).
+
+## Tecnologie utilizzate
+- **Backend**: Node.js con Express.js
+- **Frontend**: React con Vite
+- **Grafici**: react-chartjs-2 e chart.js
+
+## Come iniziare
+1. Clona il repository: `git clone https://github.com/pietrondo/quariroma`
+2. Installa le dipendenze: `npm install`
+3. Avvia l'applicazione: `npm start`
+4. Accedi con le credenziali demo: `admin/admin`
+
+## Contribuire
+- Forka il repository e crea una branch per ogni feature o bugfix.
+- Segui le convenzioni di commit (Conventional Commits).
+- Apri una pull request per la revisione.
+
+## Licenza
+Questo progetto è distribuito sotto licenza MIT.
