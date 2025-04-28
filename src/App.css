@@ -1,0 +1,141 @@
+/* Minimal, modern, responsive UI for aquarium management */
+body {
+	background: #f7f8fa;
+	font-family: 'Inter', Arial, sans-serif;
+	color: #222;
+	margin: 0;
+}
+
+.container {
+	max-width: 600px;
+	margin: 2rem auto;
+	background: #fff;
+	border-radius: 12px;
+	box-shadow: 0 2px 16px #0001;
+	padding: 2rem 2.5rem 2.5rem 2.5rem;
+}
+
+.header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 2rem;
+}
+
+.logout-btn {
+	background: #eee;
+	border: none;
+	padding: 0.5rem 1.2rem;
+	border-radius: 6px;
+	cursor: pointer;
+	font-weight: 500;
+	transition: background 0.2s;
+}
+.logout-btn:hover {
+	background: #f66;
+	color: #fff;
+}
+
+h1, h2 {
+	font-weight: 700;
+	margin-bottom: 1rem;
+}
+
+.form-inline {
+	display: flex;
+	gap: 0.5rem;
+	margin-bottom: 1rem;
+	flex-wrap: wrap;
+}
+.form-inline input, .form-inline select {
+	padding: 0.5rem;
+	border: 1px solid #ddd;
+	border-radius: 5px;
+	font-size: 1rem;
+}
+.form-inline button {
+	background: #4f8cff;
+	color: #fff;
+	border: none;
+	padding: 0.5rem 1.2rem;
+	border-radius: 6px;
+	cursor: pointer;
+	font-weight: 500;
+	transition: background 0.2s;
+}
+.form-inline button:hover {
+	background: #2563eb;
+}
+
+.list {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+.list-item {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 0.6rem 0.2rem;
+	border-bottom: 1px solid #f0f0f0;
+}
+.delete-btn {
+	background: #eee;
+	border: none;
+	padding: 0.3rem 0.8rem;
+	border-radius: 5px;
+	cursor: pointer;
+	transition: background 0.2s;
+	margin-left: 1rem;
+}
+.delete-btn:hover {
+	background: #f66;
+	color: #fff;
+}
+
+.error {
+	background: #ffeaea;
+	color: #c00;
+	padding: 0.7rem 1rem;
+	border-radius: 6px;
+	margin: 1rem 0;
+	font-size: 1rem;
+}
+
+.login-container {
+	max-width: 350px;
+	margin: 5rem auto 0 auto;
+	background: #fff;
+	border-radius: 12px;
+	box-shadow: 0 2px 16px #0001;
+	padding: 2.5rem 2rem 2rem 2rem;
+}
+.login-form {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
+.login-form input {
+	padding: 0.7rem;
+	border: 1px solid #ddd;
+	border-radius: 5px;
+	font-size: 1rem;
+}
+.login-form button {
+	background: #4f8cff;
+	color: #fff;
+	border: none;
+	padding: 0.7rem 1.2rem;
+	border-radius: 6px;
+	cursor: pointer;
+	font-weight: 500;
+	transition: background 0.2s;
+}
+.login-form button:hover {
+	background: #2563eb;
+}
+@media (max-width: 700px) {
+	.container {
+		padding: 1rem;
+	}
+}
