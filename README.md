@@ -62,3 +62,44 @@ function modFiltraAcquari(parNome) {
 ---
 
 Per dettagli su errori, milestone e policy temporanee, consulta ERRORS.md, STATUS.md e ./docs/.
+
+## Repository e badge
+
+[![GitHub repo](https://img.shields.io/badge/GitHub-quariroma-blue?logo=github)](https://github.com/pietrondo/quariroma)
+
+Repository ufficiale: [https://github.com/pietrondo/quariroma](https://github.com/pietrondo/quariroma)
+
+## Contribuire
+
+- Forka il repository e crea una branch descrittiva per ogni feature/bugfix.
+- Segui le convenzioni di commit (Conventional Commits) e aggiorna STATUS.md, ERRORS.md e README.md dove necessario.
+- Apri una pull request: sarà revisionata da almeno un membro del team.
+- Usa Jira per tracciare issue/task e aggiorna lo stato delle attività.
+- Consulta STATUS.md per priorità e milestone.
+
+## CI/CD
+
+Il progetto può essere automatizzato con GitHub Actions. Esempio di workflow (file `.github/workflows/ci.yml`):
+
+```yaml
+name: Node.js CI
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+```
+
+Aggiungi test e step di deploy secondo le policy del team.

@@ -1,11 +1,24 @@
 import { useEffect, useState } from 'react'
 import './App.css'
 import logoAcquari from '../logo-acquari.png'
+import { Line } from "react-chartjs-2";
+import {
+	Chart as ChartJS,
+	CategoryScale,
+	LinearScale,
+	PointElement,
+	LineElement,
+	Title,
+	Tooltip,
+	Legend
+} from "chart.js";
+
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 /**
- * @fileoverview Frontend React per la gestione acquari e pesci con autenticazione locale.
+ * @fileoverview Frontend React SPA per gestione acquari, parametri e grafici storici.
  * @module modApp
- * @description Mostra schermata di login e dashboard solo se autenticato.
+ * @description Dashboard con elenco acquari cliccabili, dettaglio SPA per ogni acquario con form parametri, grafici storici e storico misurazioni.
  * Prefissi: par (parametri), var (variabili), res (risorse), mod (moduli).
  */
 
@@ -22,6 +35,19 @@ function App() {
 	const [varShowRegister, setVarShowRegister] = useState(false);
 	const [parRegister, setParRegister] = useState({ parUsername: '', parPassword: '' });
 	const [varRegisterMsg, setVarRegisterMsg] = useState('');
+	const [varSelectedAquarium, setVarSelectedAquarium] = useState(null);
+	const [varParams, setVarParams] = useState([]);
+	const [parNewParam, setParNewParam] = useState({ tipo: "temperatura", valore: "", data: "" });
+	const arrParamTypes = [
+		"temperatura",
+		"ph",
+		"gh",
+		"kh",
+		"no2",
+		"no3",
+		"ammoniaca",
+		"ossigeno"
+	];
 
 	// Carica dati utente se autenticato
 	useEffect(() => {
@@ -148,6 +174,57 @@ function App() {
 		}
 	}
 
+	async function modSelectAquarium(parId) {
+		setVarSelectedAquarium(parId);
+		setVarError("");
+		try {
+			const res = await fetch(`/api/aquariums/${parId}/params`);
+			const data = await res.json();
+			if (!res.ok) throw new Error(data.error);
+			setVarParams(data.parametri || []);
+		} catch (err) {
+			setVarError(err.message);
+		}
+	}
+
+	async function modAddParam(e) {
+		e.preventDefault();
+		setVarError("");
+		try {
+			const res = await fetch(`/api/aquariums/${varSelectedAquarium}/params`, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					tipo: parNewParam.tipo,
+					valore: Number(parNewParam.valore),
+					data: parNewParam.data || new Date().toISOString()
+				})
+			});
+			const data = await res.json();
+			if (!res.ok) throw new Error(data.error);
+			setVarParams(data.parametri);
+			setParNewParam({ tipo: "temperatura", valore: "", data: "" });
+		} catch (err) {
+			setVarError(err.message);
+		}
+	}
+
+	function modGetChartData(parTipo) {
+		const arr = varParams.filter(p => p.tipo === parTipo).sort((a, b) => new Date(a.data) - new Date(b.data));
+		return {
+			labels: arr.map(p => new Date(p.data).toLocaleString()),
+			datasets: [
+				{
+					label: parTipo,
+					data: arr.map(p => p.valore),
+					borderColor: "#2563eb",
+					backgroundColor: "#4f8cff33",
+					tension: 0.3
+				}
+			]
+		};
+	}
+
 	if (!varToken) {
 		return (
 			<div className='login-container'>
@@ -184,57 +261,106 @@ function App() {
 		);
 	}
 
+	if (varSelectedAquarium) {
+		const varAq = varAquariums.find(a => a.id === varSelectedAquarium);
+		return (
+			<div className="container">
+				<header className="header">
+					<div style={{ display: "flex", alignItems: "center", gap: "0.7rem" }}>
+						<img src={logoAcquari} alt="Logo Quarioma" className="logo-app" style={{ width: "38px", height: "38px", borderRadius: "8px", background: "#f7f8fa" }} />
+						<span>Benvenuto, {varUsername}</span>
+					</div>
+					<button className="logout-btn" onClick={modLogout}>Logout</button>
+				</header>
+				<button className="link-btn" onClick={() => setVarSelectedAquarium(null)} style={{ marginBottom: "1.5rem" }}>&larr; Torna alla dashboard</button>
+				<h2>Dettaglio Acquario: {varAq?.name} ({varAq?.volume}L)</h2>
+				<section>
+					<h3>Inserisci Parametro</h3>
+					<form onSubmit={modAddParam} className="form-inline">
+						<select value={parNewParam.tipo} onChange={e => setParNewParam(p => ({ ...p, tipo: e.target.value }))}>
+							{arrParamTypes.map(t => <option key={t} value={t}>{t.toUpperCase()}</option>)}
+						</select>
+						<input type="number" step="any" placeholder="Valore" value={parNewParam.valore} onChange={e => setParNewParam(p => ({ ...p, valore: e.target.value }))} required />
+						<input type="datetime-local" value={parNewParam.data} onChange={e => setParNewParam(p => ({ ...p, data: e.target.value }))} />
+						<button type="submit">Aggiungi</button>
+					</form>
+				</section>
+				<section>
+					<h3>Grafici Parametri</h3>
+					<div style={{ display: "flex", flexWrap: "wrap", gap: "2rem" }}>
+						{arrParamTypes.map(parTipo => (
+							<div key={parTipo} style={{ minWidth: 280, flex: 1 }}></div>
+								<Line data={modGetChartData(parTipo)} options={{ plugins: { legend: { display: false } }, responsive: true, maintainAspectRatio: false, height: 200 }} />
+								<div style={{ textAlign: "center", marginTop: 8 }}>{parTipo.toUpperCase()}</div>
+							</div>
+						))}
+					</div>
+				</section>
+				<section>
+					<h3>Storico Misurazioni</h3>
+					<ul className="list">
+						{[...varParams].sort((a, b) => new Date(b.data) - new Date(a.data)).map((p, i) => (
+							<li key={i} className="list-item"></li>
+								{p.tipo.toUpperCase()} - {p.valore} ({new Date(p.data).toLocaleString()})
+							</li>
+						))}
+					</ul>
+				</section>
+				{varError && <div className="error">Errore: {varError}</div>}
+			</div>
+		);
+	}
+
 	return (
-		<div className='container'>
-			<header className='header'>
-				<div style={{ display: 'flex', alignItems: 'center', gap: '0.7rem' }}>
-					<img src={logoAcquari} alt='Logo Quarioma' className='logo-app' style={{ width: '38px', height: '38px', borderRadius: '8px', background: '#f7f8fa' }} />
+		<div className="container">
+			<header className="header">
+				<div style={{ display: "flex", alignItems: "center", gap: "0.7rem" }}>
+					<img src={logoAcquari} alt="Logo Quarioma" className="logo-app" style={{ width: "38px", height: "38px", borderRadius: "8px", background: "#f7f8fa" }} />
 					<span>Benvenuto, {varUsername}</span>
 				</div>
-				<button className='logout-btn' onClick={modLogout}>Logout</button>
+				<button className="logout-btn" onClick={modLogout}>Logout</button>
 			</header>
 			<h1>Gestione Acquari</h1>
-			{varError && <div className='error'>Errore: {varError}</div>}
+			{varError && <div className="error">Errore: {varError}</div>}
 			<section>
 				<h2>Acquari</h2>
-				<form onSubmit={modAddAquarium} className='form-inline'>
-					<input placeholder='Nome' value={parNewAquarium.name} onChange={e => setParNewAquarium(a => ({ ...a, name: e.target.value }))} required />
-					<input placeholder='Volume (L)' type='number' value={parNewAquarium.volume} onChange={e => setParNewAquarium(a => ({ ...a, volume: e.target.value }))} required />
-					<button type='submit'>Aggiungi Acquario</button>
+				<form onSubmit={modAddAquarium} className="form-inline">
+					<input placeholder="Nome" value={parNewAquarium.name} onChange={e => setParNewAquarium(a => ({ ...a, name: e.target.value }))} required />
+					<input placeholder="Volume (L)" type="number" value={parNewAquarium.volume} onChange={e => setParNewAquarium(a => ({ ...a, volume: e.target.value }))} required />
+					<button type="submit">Aggiungi Acquario</button>
 				</form>
-				<ul className='list'>
+				<ul className="list">
 					{varAquariums.map(a => (
-						<li key={a.id} className='list-item'>
+						<li key={a.id} className="list-item" style={{ cursor: "pointer" }} onClick={() => modSelectAquarium(a.id)}>
 							{a.name} ({a.volume}L)
-							<button onClick={() => modDeleteAquarium(a.id)} className='delete-btn'>Elimina</button>
 						</li>
 					))}
 				</ul>
 			</section>
 			<section>
 				<h2>Pesci</h2>
-				<form onSubmit={modAddFish} className='form-inline'>
-					<input placeholder='Nome' value={parNewFish.name} onChange={e => setParNewFish(f => ({ ...f, name: e.target.value }))} required />
-					<input placeholder='Specie' value={parNewFish.species} onChange={e => setParNewFish(f => ({ ...f, species: e.target.value }))} required />
+				<form onSubmit={modAddFish} className="form-inline">
+					<input placeholder="Nome" value={parNewFish.name} onChange={e => setParNewFish(f => ({ ...f, name: e.target.value }))} required />
+					<input placeholder="Specie" value={parNewFish.species} onChange={e => setParNewFish(f => ({ ...f, species: e.target.value }))} required />
 					<select value={parNewFish.aquariumId} onChange={e => setParNewFish(f => ({ ...f, aquariumId: e.target.value }))} required>
-						<option value=''>Seleziona acquario</option>
+						<option value="">Seleziona acquario</option>
 						{varAquariums.map(a => (
 							<option key={a.id} value={a.id}>{a.name}</option>
 						))}
 					</select>
-					<button type='submit'>Aggiungi Pesce</button>
+					<button type="submit">Aggiungi Pesce</button>
 				</form>
-				<ul className='list'>
+				<ul className="list">
 					{varFish.map(f => (
-						<li key={f.id} className='list-item'>
+						<li key={f.id} className="list-item">
 							{f.name} ({f.species}) - Acquario: {varAquariums.find(a => a.id === f.aquariumId)?.name || 'N/A'}
-							<button onClick={() => modDeleteFish(f.id)} className='delete-btn'>Elimina</button>
+							<button onClick={() => modDeleteFish(f.id)} className="delete-btn">Elimina</button>
 						</li>
 					))}
 				</ul>
 			</section>
 		</div>
-	)
+	);
 }
 
-export default App
+export default App;
